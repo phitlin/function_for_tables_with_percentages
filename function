@@ -1,0 +1,87 @@
+##compiled function for R
+##takes any table and creates new table that has totals next to percentages and totals for bottom row or columns
+##          must write either fancy_tab_choice(df, "rows")
+##          or fancy_tab_choice(df, "columns")
+
+
+##needed libraries
+library(plyr)   
+library(dplyr)
+library(Rcmdr)
+library(data.table)
+library(tidyverse)
+
+
+
+
+
+
+
+fancy_tab_choice <- function(wtbl, direction) {
+  if (direction != "rows" && direction != "columns"){                 ##make sure person choose 1 of 2 correct options
+    stop("error - must choose either tab_choice(df, ''rows'') or tab_choice(df, ''columns''")
+  }
+  if (direction == "columns"){                      ##if chosen columns percentages
+    wtblpct <- colPercents(wtbl, digits=2)          ##get table of percentages
+    wtblpct <- as.matrix(wtblpct)
+    g <- c(1:ncol(wtblpct))                         ##rename columns of percentages to add "_percent"
+    for (i in g){
+      m <- colnames(wtblpct)[i]
+      colnames(wtblpct)[i] <- paste(m, "_percent", sep="")
+    }
+    wtblpct <- head(wtblpct, -2)                    ##delete the bottom two rows - total and count
+    wtblcomb <- cbind(wtbl, wtblpct)                ##combine two tables 
+    wtblcomb <- as.data.frame(wtblcomb)
+    columns <- ncol(wtblcomb)
+    half <- columns/2                               ##generate the order of columns as a vector
+    i <- 0
+    columnsorder <- vector(mode="numeric", length=0)
+    repeat {
+      i = i + 1
+      columnsorder <- append(columnsorder, i)
+      j <- i + half
+      columnsorder <- append(columnsorder, j)
+      if (j == columns){
+        break
+      }
+    }
+    output <- setcolorder(wtblcomb, columnsorder)         ##reorder columns by correct vector
+    total_line <- colSums(output)                         ##gets sums for each column
+    output <- rbind(output, total_line)                   ##adds total row 
+    y <- nrow(output)
+    row.names(output)[y] <- "Totals"                      ##change name of total row to "Totals"
+  } else {                                              #if chosen row percentages
+    wtblpct <- rowPercents(wtbl, digits=2)              ##get table of percentages
+    wtbl <- as.matrix(wtbl)
+    wtblpct <- as.matrix(wtblpct)
+    g <- c(1:ncol(wtblpct))                             ##rename columns of percentages to add "_percent"
+    for (i in g-1){
+      m <- colnames(wtblpct)[i]
+      colnames(wtblpct)[i] <- paste(m, "_percent", sep="")
+    }
+    wtblcomb <- cbind(wtbl, wtblpct)                    ##combine two tables 
+    wtblcomb <- as.data.frame(wtblcomb)
+    columns <- ncol(wtblcomb)
+    half <- (columns-2)/2                               ##generate order of columns as a vector, keeping last 2 columns as is
+    i <- 0
+    columnsorder <- vector(mode="numeric", length=0)
+    repeat {
+      i = i + 1
+      columnsorder <- append(columnsorder, i)
+      j <- i + half
+      columnsorder <- append(columnsorder, j)
+      if (j == columns-2){
+        break
+      }
+    }  
+    d <- columns-1                                      ##now adding last 2 columns          
+    columnsorder <- append(columnsorder, columns)
+    columnsorder <- append(columnsorder, d)
+    output <- setcolorder(wtblcomb, columnsorder)  
+    }
+  return(output)
+}
+
+
+
+
