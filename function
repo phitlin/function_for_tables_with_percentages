@@ -62,7 +62,7 @@ fancy_tab_choice <- function(wtbl, direction) {
     wtblcomb <- cbind(wtbl, wtblpct)                    ##combine two tables 
     wtblcomb <- as.data.frame(wtblcomb)
     columns <- ncol(wtblcomb)
-    half <- (columns-2)/2                               ##generate order of columns as a vector, keeping last 2 columns as is
+    half <- (columns-2)/2                               ##generate order of columns as a vector, keeping last 2 columns at end
     i <- 0
     columnsorder <- vector(mode="numeric", length=0)
     repeat {
